@@ -182,6 +182,7 @@ public:
 
         // 1. Convert ros message to pcl point cloud
         copyPointCloud(laserCloudMsg);
+        ROS_INFO("imageProjection: Received cloud with %d points", (int)laserCloudIn->points.size());
         // 2. Start and end angle of a scan
         findStartEndAngle();
         // 3. Range image projection
