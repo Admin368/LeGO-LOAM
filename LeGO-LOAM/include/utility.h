@@ -46,6 +46,15 @@
 
 #define PI 3.14159265
 
+// Debug logging - Set to 1 to enable, 0 to disable
+#define LEGO_LOAM_DEBUG 1
+
+#if LEGO_LOAM_DEBUG
+  #define DEBUG_LOG(msg) ROS_INFO_STREAM("[DEBUG] " << msg)
+#else
+  #define DEBUG_LOG(msg) ((void)0)
+#endif
+
 using namespace std;
 
 typedef pcl::PointXYZI  PointType;
