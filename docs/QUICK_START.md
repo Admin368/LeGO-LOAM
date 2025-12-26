@@ -29,17 +29,27 @@ docker build -f Dockerfile.ros -t lego-loam:melodic .
 
 Wait ~10-15 minutes for completion.
 
+**Enable X11 forwarding for RViz:**
+
+```bash
+xhost +local:docker
+```
+
 ---
 
 ## Step 2: Running LeGO-LOAM
 
-You need **2 terminals**.
+You need **2-3 terminals**.
 
 ### Terminal 1: Start LeGO-LOAM
 
 ```bash
-# Enter the Docker container
-docker run -it --rm --name lego-loam -v $(pwd):/workspace -w /catkin_ws lego-loam:melodic bash
+# Enter the Docker container with X11 forwarding
+docker run -it --rm --name lego-loam \
+  -v $(pwd):/workspace \
+  -v /tmp/.X11-unix:/tmp/.X11-unix \
+  -e DISPLAY=$DISPLAY \
+  -w /catkin_ws lego-loam:melodic bash
 ```
 
 Inside the container, run:
@@ -74,6 +84,18 @@ docker exec -it lego-loam bash -c "source /opt/ros/melodic/setup.bash && rosbag 
 ```
 
 Replace the bag path with your own file if needed.
+
+---
+
+### Terminal 3: Launch RViz (Optional)
+
+Open a third terminal for visualization:
+
+```bash
+docker exec -it lego-loam bash -c "source /opt/ros/melodic/setup.bash && source /catkin_ws/devel/setup.bash && rviz -d /workspace/LeGO-LOAM/launch/test.rviz"
+```
+
+You should see the RViz window with point clouds and odometry visualization.
 
 ---
 
