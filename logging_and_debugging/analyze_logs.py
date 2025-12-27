@@ -50,8 +50,8 @@ class LogAnalyzer:
         feature_counts = defaultdict(list)
 
         for log_line in self.logs:
-            # ImageProjection: Input
-            if "ImageProjection: Received point cloud with" in log_line:
+            # ImageProjection: Input - handle [ImageProjection] format
+            if "[ImageProjection]" in log_line and "Received point cloud with" in log_line:
                 match = re.search(r'(\d+)\s+points', log_line)
                 if match:
                     count = int(match.group(1))
@@ -157,22 +157,24 @@ class LogAnalyzer:
 
         for log_line in self.logs:
             if "Received" in log_line:
-                if "ImageProjection: Received" in log_line:
+                # Handle format: [ImageProjection] Received (with brackets)
+                if "[ImageProjection]" in log_line and "Received" in log_line:
                     receive_counts['ImageProjection'] += 1
                     nodes_seen.add('ImageProjection')
-                elif "FeatureAssociation: Received" in log_line:
+                elif "[FeatureAssociation]" in log_line and "Received" in log_line:
                     receive_counts['FeatureAssociation'] += 1
                     nodes_seen.add('FeatureAssociation')
-                elif "MapOptimization: Received" in log_line:
+                elif "[MapOptimization]" in log_line and "Received" in log_line:
                     receive_counts['MapOptimization'] += 1
                     nodes_seen.add('MapOptimization')
 
             if "Publishing" in log_line:
-                if "ImageProjection: Publishing" in log_line:
+                # Handle format: [ImageProjection] Publishing (with brackets)
+                if "[ImageProjection]" in log_line and "Publishing" in log_line:
                     publish_counts['ImageProjection'] += 1
-                elif "FeatureAssociation: Publishing" in log_line:
+                elif "[FeatureAssociation]" in log_line and "Publishing" in log_line:
                     publish_counts['FeatureAssociation'] += 1
-                elif "MapOptimization: Publishing" in log_line:
+                elif "[MapOptimization]" in log_line and "Publishing" in log_line:
                     publish_counts['MapOptimization'] += 1
 
         print(f"\n📡 Nodes detected: {', '.join(sorted(nodes_seen))}")
