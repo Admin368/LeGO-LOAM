@@ -1,0 +1,14 @@
+LeGO-LOAM Debug Session Metadata
+================================
+Collection Time: Sat Dec 27 01:13:56 EST 2025
+System: Linux 177bd2582e64 5.15.0-140-generic #150~20.04.1-Ubuntu SMP Fri Apr 25 10:28:04 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux
+Log Directory: /tmp/lego_loam_logs
+Session Directory: /workspace/logging_and_debugging/debug_sessions/session_20251227_011356
+
+Files Included:
+- lego_loam_debug.log: Main debug output from all nodes
+- metadata.txt: This file
+
+To analyze these logs, run:
+  python3 /workspace/logging_and_debugging/analyze_logs.py /workspace/logging_and_debugging/debug_sessions/session_20251227_011356/lego_loam_debug.log
+

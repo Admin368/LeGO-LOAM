@@ -46,6 +46,45 @@
 
 #define PI 3.14159265
 
+// Debug logging - Set to 1 to enable, 0 to disable
+#define LEGO_LOAM_DEBUG 1
+#define LEGO_LOAM_FILE_DEBUG 1  // Enable file-based logging
+
+#include "lego_loam_logger.h"
+
+#if LEGO_LOAM_DEBUG
+  // Console + file logging combined
+  #define DEBUG_LOG(msg) do { \
+    ROS_INFO_STREAM("[DEBUG] " << msg); \
+    if (LEGO_LOAM_FILE_DEBUG) { \
+      std::ostringstream oss_temp; \
+      oss_temp << msg; \
+      LeGOLOAMLogger::log(LeGOLOAMLogger::DEBUG, "Node", oss_temp.str()); \
+    } \
+  } while(0)
+  
+  // File logging only
+  #define FILE_LOG(node, msg) do { \
+    std::ostringstream oss_temp; \
+    oss_temp << msg; \
+    LeGOLOAMLogger::log(LeGOLOAMLogger::DEBUG, node, oss_temp.str()); \
+  } while(0)
+  
+  // Helper macros for each node
+  #define LOG_IMG_PROJ(msg) FILE_LOG("ImageProjection", msg)
+  #define LOG_FEAT_ASSOC(msg) FILE_LOG("FeatureAssociation", msg)
+  #define LOG_MAP_OPT(msg) FILE_LOG("MapOptimization", msg)
+  #define LOG_TRANSFORM(msg) FILE_LOG("TransformFusion", msg)
+  
+#else
+  #define DEBUG_LOG(msg) ((void)0)
+  #define FILE_LOG(node, msg) ((void)0)
+  #define LOG_IMG_PROJ(msg) ((void)0)
+  #define LOG_FEAT_ASSOC(msg) ((void)0)
+  #define LOG_MAP_OPT(msg) ((void)0)
+  #define LOG_TRANSFORM(msg) ((void)0)
+#endif
+
 using namespace std;
 
 typedef pcl::PointXYZI  PointType;
@@ -57,9 +96,9 @@ extern const string imuTopic = "/imu/data";
 extern const string fileDirectory = "/tmp/";
 
 // Using velodyne cloud "ring" channel for image projection (other lidar may have different name for this channel, change "PointXYZIR" below)
-extern const bool useCloudRing = false; // if true, ang_res_y and ang_bottom are not used
+extern const bool useCloudRing = true; // if true, ang_res_y and ang_bottom are not used
 
-// VLP-16
+// VLP-16 (ACTIVE - detected from bag file)
 extern const int N_SCAN = 16;
 extern const int Horizon_SCAN = 1800;
 extern const float ang_res_x = 0.2;
