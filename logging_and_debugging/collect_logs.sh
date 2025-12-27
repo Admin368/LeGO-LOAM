@@ -1,11 +1,17 @@
 #!/bin/bash
 # LeGO-LOAM Debug Log Collection and Analysis Script
 # Collects logs from running LeGO-LOAM system and performs analysis
+#
+# Location: /workspace/logging_and_debugging/collect_logs.sh
+# All debugging tools are centralized in this folder.
 
 set -e
 
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 LOG_DIR="/tmp/lego_loam_logs"
-ARCHIVE_DIR="./lego_loam_debug_session"
+ARCHIVE_DIR="${SCRIPT_DIR}/debug_sessions"
 
 # Colors for output
 RED='\033[0;31m'
@@ -27,6 +33,7 @@ usage() {
     echo "  -c, --collect    Collect logs from running system"
     echo "  -a, --analyze    Analyze collected logs"
     echo "  -r, --run        Run collection and analysis"
+    echo "  --clear          Clear old log files"
     echo "  -h, --help       Show this help message"
     echo ""
     echo "Examples:"
@@ -38,6 +45,10 @@ usage() {
     echo ""
     echo "  # Do both at once"
     echo "  $0 --run"
+    echo ""
+    echo "Log Files:"
+    echo "  Active logs:   ${LOG_DIR}/lego_loam_debug.log"
+    echo "  Archives:      ${ARCHIVE_DIR}/"
     echo ""
 }
 
@@ -81,7 +92,7 @@ Files Included:
 - metadata.txt: This file
 
 To analyze these logs, run:
-  python3 /workspace/analyze_logs.py $SESSION_DIR/lego_loam_debug.log
+  python3 ${SCRIPT_DIR}/analyze_logs.py $SESSION_DIR/lego_loam_debug.log
 
 EOF
 
@@ -126,12 +137,13 @@ analyze_logs() {
     echo "File size: $(du -h "$LOG_FILE" | cut -f1)"
     echo ""
 
-    # Run Python analysis
+    # Run Python analysis - use script from same directory
     if command -v python3 &> /dev/null; then
-        if [ -f "/workspace/analyze_logs.py" ]; then
-            python3 /workspace/analyze_logs.py "$LOG_FILE"
+        ANALYZE_SCRIPT="${SCRIPT_DIR}/analyze_logs.py"
+        if [ -f "$ANALYZE_SCRIPT" ]; then
+            python3 "$ANALYZE_SCRIPT" "$LOG_FILE"
         else
-            echo -e "${RED}✗ Analysis script not found: /workspace/analyze_logs.py${NC}"
+            echo -e "${RED}✗ Analysis script not found: $ANALYZE_SCRIPT${NC}"
             return 1
         fi
     else
