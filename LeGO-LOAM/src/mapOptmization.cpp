@@ -613,7 +613,7 @@ public:
     }
 
     void laserCloudCornerLastHandler(const sensor_msgs::PointCloud2ConstPtr& msg){
-        DEBUG_LOG("MapOptimization: Received corner cloud with " << msg->width * msg->height << " points");
+        LOG_MAP_OPT("Received corner cloud with " << msg->width * msg->height << " points");
         timeLaserCloudCornerLast = msg->header.stamp.toSec();
         laserCloudCornerLast->clear();
         pcl::fromROSMsg(*msg, *laserCloudCornerLast);
@@ -621,7 +621,7 @@ public:
     }
 
     void laserCloudSurfLastHandler(const sensor_msgs::PointCloud2ConstPtr& msg){
-        DEBUG_LOG("MapOptimization: Received surf cloud with " << msg->width * msg->height << " points");
+        LOG_MAP_OPT("Received surf cloud with " << msg->width * msg->height << " points");
         timeLaserCloudSurfLast = msg->header.stamp.toSec();
         laserCloudSurfLast->clear();
         pcl::fromROSMsg(*msg, *laserCloudSurfLast);
@@ -629,7 +629,7 @@ public:
     }
 
     void laserOdometryHandler(const nav_msgs::Odometry::ConstPtr& laserOdometry){
-        DEBUG_LOG("MapOptimization: Received laser odometry");
+        LOG_MAP_OPT("Received laser odometry");
         timeLaserOdometry = laserOdometry->header.stamp.toSec();
         double roll, pitch, yaw;
         geometry_msgs::Quaternion geoQuat = laserOdometry->pose.pose.orientation;
@@ -766,7 +766,7 @@ public:
         if (cloudKeyPoses3D->points.empty() == true)
             return;
             
-        DEBUG_LOG("MapOptimization: Publishing global map with " << cloudKeyPoses3D->points.size() << " key poses");
+        LOG_MAP_OPT("Publishing global map with " << cloudKeyPoses3D->points.size() << " key poses");
         
 	    // kd-tree to find near key frames to visualize
         std::vector<int> pointSearchIndGlobalMap;
@@ -793,7 +793,7 @@ public:
         downSizeFilterGlobalMapKeyFrames.setInputCloud(globalMapKeyFrames);
         downSizeFilterGlobalMapKeyFrames.filter(*globalMapKeyFramesDS);
  
-        DEBUG_LOG("MapOptimization: Global map frame has " << globalMapKeyFramesDS->points.size() << " points");
+        LOG_MAP_OPT("Global map frame has " << globalMapKeyFramesDS->points.size() << " points");
  
         sensor_msgs::PointCloud2 cloudMsgTemp;
         pcl::toROSMsg(*globalMapKeyFramesDS, cloudMsgTemp);

@@ -180,11 +180,11 @@ public:
     
     void cloudHandler(const sensor_msgs::PointCloud2ConstPtr& laserCloudMsg){
 
-        DEBUG_LOG("ImageProjection: Received point cloud with " << laserCloudMsg->width * laserCloudMsg->height << " points");
+        LOG_IMG_PROJ("Received point cloud with " << laserCloudMsg->width * laserCloudMsg->height << " points");
         
         // 1. Convert ros message to pcl point cloud
         copyPointCloud(laserCloudMsg);
-        DEBUG_LOG("ImageProjection: After conversion, PCL cloud has " << laserCloudIn->points.size() << " points");
+        LOG_IMG_PROJ("After conversion, PCL cloud has " << laserCloudIn->points.size() << " points");
         
         // 2. Start and end angle of a scan
         findStartEndAngle();
@@ -466,7 +466,7 @@ public:
     
     void publishCloud(){
         
-        DEBUG_LOG("ImageProjection: Publishing clouds - Ground: " << groundCloud->points.size() 
+        LOG_IMG_PROJ("Publishing clouds - Ground: " << groundCloud->points.size() 
                   << ", Segmented: " << segmentedCloud->points.size() 
                   << ", Outliers: " << outlierCloud->points.size());
         

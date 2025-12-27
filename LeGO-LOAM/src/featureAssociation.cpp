@@ -460,7 +460,7 @@ public:
 
     void laserCloudHandler(const sensor_msgs::PointCloud2ConstPtr& laserCloudMsg){
 
-        DEBUG_LOG("FeatureAssociation: Received segmented cloud with " << laserCloudMsg->width * laserCloudMsg->height << " points");
+        LOG_FEAT_ASSOC("Received segmented cloud with " << laserCloudMsg->width * laserCloudMsg->height << " points");
 
         cloudHeader = laserCloudMsg->header;
 
@@ -470,14 +470,14 @@ public:
         segmentedCloud->clear();
         pcl::fromROSMsg(*laserCloudMsg, *segmentedCloud);
 
-        DEBUG_LOG("FeatureAssociation: Converted to PCL cloud with " << segmentedCloud->points.size() << " points");
+        LOG_FEAT_ASSOC("Converted to PCL cloud with " << segmentedCloud->points.size() << " points");
 
         newSegmentedCloud = true;
     }
 
     void outlierCloudHandler(const sensor_msgs::PointCloud2ConstPtr& msgIn){
 
-        DEBUG_LOG("FeatureAssociation: Received outlier cloud with " << msgIn->width * msgIn->height << " points");
+        LOG_FEAT_ASSOC("Received outlier cloud with " << msgIn->width * msgIn->height << " points");
 
         timeNewOutlierCloud = msgIn->header.stamp.toSec();
 
@@ -489,7 +489,7 @@ public:
 
     void laserCloudInfoHandler(const cloud_msgs::cloud_infoConstPtr& msgIn)
     {
-        DEBUG_LOG("FeatureAssociation: Received cloud info");
+        LOG_FEAT_ASSOC("Received cloud info");
         
         timeNewSegmentedCloudInfo = msgIn->header.stamp.toSec();
         segInfo = *msgIn;
@@ -793,7 +793,7 @@ public:
 
     void publishCloud()
     {
-        DEBUG_LOG("FeatureAssociation: Publishing features - Sharp corners: " << cornerPointsSharp->points.size()
+        LOG_FEAT_ASSOC("Publishing features - Sharp corners: " << cornerPointsSharp->points.size()
                   << ", Less sharp: " << cornerPointsLessSharp->points.size()
                   << ", Flat surf: " << surfPointsFlat->points.size()
                   << ", Less flat: " << surfPointsLessFlat->points.size());
