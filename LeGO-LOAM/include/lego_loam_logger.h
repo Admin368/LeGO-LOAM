@@ -8,19 +8,27 @@
 #include <mutex>
 #include <ctime>
 #include <iomanip>
-#include <ros/ros.h>
+#include <chrono>
 
+// Singleton logger class to avoid multiple definition issues
 class LeGOLOAMLogger {
 private:
-    static std::mutex log_mutex_;
-    static std::string log_dir_;
-    static std::ofstream log_file_;
-    static bool initialized_;
-    static bool enable_console_output_;
-    static bool enable_file_output_;
+    std::mutex log_mutex_;
+    std::string log_dir_;
+    std::ofstream log_file_;
+    bool initialized_;
+    bool enable_console_output_;
+    bool enable_file_output_;
+
+    // Private constructor for singleton
+    LeGOLOAMLogger() 
+        : log_dir_("/tmp/lego_loam_logs/")
+        , initialized_(false)
+        , enable_console_output_(true)
+        , enable_file_output_(true) {}
 
     // Get timestamp in format: YYYY-MM-DD HH:MM:SS.mmm
-    static std::string getTimestamp() {
+    std::string getTimestamp() {
         auto now = std::time(nullptr);
         auto tm = *std::localtime(&now);
         std::ostringstream oss;
@@ -28,8 +36,8 @@ private:
         return oss.str();
     }
 
-    // Get current time in milliseconds (appended to timestamp)
-    static std::string getMilliseconds() {
+    // Get current time in milliseconds
+    std::string getMilliseconds() {
         auto now = std::chrono::system_clock::now();
         auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
             now.time_since_epoch()) % 1000;
@@ -38,16 +46,13 @@ private:
         return oss.str();
     }
 
-public:
-    enum LogLevel {
-        DEBUG,
-        INFO,
-        WARNING,
-        ERROR
-    };
+    // Get singleton instance
+    static LeGOLOAMLogger& getInstance() {
+        static LeGOLOAMLogger instance;
+        return instance;
+    }
 
-    // Initialize logger with directory path
-    static void init(const std::string& log_directory = "/tmp/lego_loam_logs/") {
+    void initImpl(const std::string& log_directory) {
         std::lock_guard<std::mutex> lock(log_mutex_);
         
         if (initialized_) return;
@@ -62,15 +67,12 @@ public:
         log_file_.open(log_file_path, std::ios::app);
         
         initialized_ = true;
-        enable_console_output_ = true;
-        enable_file_output_ = true;
     }
 
-    // Log message with level and node name
-    static void log(LogLevel level, const std::string& node_name, 
-                    const std::string& message) {
+    void logImpl(int level, const std::string& node_name, 
+                 const std::string& message) {
         if (!initialized_) {
-            init();
+            initImpl("/tmp/lego_loam_logs/");
         }
 
         std::lock_guard<std::mutex> lock(log_mutex_);
@@ -79,11 +81,11 @@ public:
         std::string level_str;
         
         switch (level) {
-            case DEBUG:   level_str = "DEBUG"; break;
-            case INFO:    level_str = "INFO "; break;
-            case WARNING: level_str = "WARN "; break;
-            case ERROR:   level_str = "ERROR"; break;
-            default:      level_str = "???? "; break;
+            case 0:  level_str = "DEBUG"; break;
+            case 1:  level_str = "INFO "; break;
+            case 2:  level_str = "WARN "; break;
+            case 3:  level_str = "ERROR"; break;
+            default: level_str = "???? "; break;
         }
         
         std::string formatted_msg = "[" + timestamp + "] [" + level_str + "] [" 
@@ -101,52 +103,47 @@ public:
         }
     }
 
-    // Convenience functions for each node
-    static void logImageProjection(const std::string& message) {
-        log(DEBUG, "ImageProjection", message);
+public:
+    enum LogLevel {
+        DEBUG = 0,
+        INFO = 1,
+        WARNING = 2,
+        ERROR = 3
+    };
+
+    // Prevent copying
+    LeGOLOAMLogger(const LeGOLOAMLogger&) = delete;
+    LeGOLOAMLogger& operator=(const LeGOLOAMLogger&) = delete;
+
+    // Static interface functions
+    static void init(const std::string& log_directory = "/tmp/lego_loam_logs/") {
+        getInstance().initImpl(log_directory);
     }
 
-    static void logFeatureAssociation(const std::string& message) {
-        log(DEBUG, "FeatureAssociation", message);
+    static void log(LogLevel level, const std::string& node_name, 
+                    const std::string& message) {
+        getInstance().logImpl(static_cast<int>(level), node_name, message);
     }
 
-    static void logMapOptimization(const std::string& message) {
-        log(DEBUG, "MapOptimization", message);
-    }
-
-    static void logTransformFusion(const std::string& message) {
-        log(DEBUG, "TransformFusion", message);
-    }
-
-    // Enable/disable output
     static void setConsoleOutput(bool enable) {
-        console_output_ = enable;
+        getInstance().enable_console_output_ = enable;
     }
 
     static void setFileOutput(bool enable) {
-        file_output_ = enable;
+        getInstance().enable_file_output_ = enable;
     }
 
-    // Close logger
     static void shutdown() {
-        std::lock_guard<std::mutex> lock(log_mutex_);
-        if (log_file_.is_open()) {
-            log_file_.close();
+        auto& inst = getInstance();
+        std::lock_guard<std::mutex> lock(inst.log_mutex_);
+        if (inst.log_file_.is_open()) {
+            inst.log_file_.close();
         }
     }
 
-    // Get log directory
     static std::string getLogDirectory() {
-        return log_dir_;
+        return getInstance().log_dir_;
     }
 };
-
-// Static member initialization
-std::mutex LeGOLOAMLogger::log_mutex_;
-std::string LeGOLOAMLogger::log_dir_ = "/tmp/lego_loam_logs/";
-std::ofstream LeGOLOAMLogger::log_file_;
-bool LeGOLOAMLogger::initialized_ = false;
-bool LeGOLOAMLogger::enable_console_output_ = true;
-bool LeGOLOAMLogger::enable_file_output_ = true;
 
 #endif // _LEGO_LOAM_LOGGER_H_

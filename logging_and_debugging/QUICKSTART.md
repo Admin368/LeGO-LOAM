@@ -13,7 +13,12 @@ Edit `LeGO-LOAM/include/utility.h`:
 #define LEGO_LOAM_FILE_DEBUG 1         // Enable file-based logging
 ```
 
-### Step 2: Rebuild
+### Step 2.1: Enter docker
+```bash
+docker exec -it lego-loam bash
+```
+
+### Step 2.2: Rebuild
 
 ```bash
 cd /catkin_ws
@@ -30,7 +35,7 @@ roslaunch lego_loam run.launch
 
 **Terminal 2** - Play your bag file:
 ```bash
-rosbag play /path/to/your.bag --clock
+rosbag play /workspace/data/2017-06-08-15-51-45_2.bag --clock
 ```
 
 ### Step 4: Analyze Logs
